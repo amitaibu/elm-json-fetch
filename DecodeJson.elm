@@ -39,7 +39,7 @@ init url =
 type Action
   = UpdateUrl String
   | SubmitUrl
-  | NewJson (Maybe (List Item))
+  | NewJson (Result Http.Error (List Item))
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -59,10 +59,17 @@ update action model =
         else
           (model, Effects.none)
 
-    NewJson maybeItems ->
-      ( {model | items <- (Maybe.withDefault [] maybeItems), isFetching <- False}
-      , Effects.none
-      )
+    NewJson result ->
+      case result of
+        Ok items ->
+          ( {model | items <- items, isFetching <- False}
+          , Effects.none
+          )
+        Err msg ->
+          -- No change, as there is some error
+          ( {model | isFetching <- False}
+          , Effects.none
+          )
 
 
 -- VIEW
@@ -121,7 +128,7 @@ view address model =
 getJson : String -> Effects Action
 getJson url =
   Http.get decodeUrl url
-    |> Task.toMaybe
+    |> Task.toResult
     |> Task.map NewJson
     |> Effects.task
 
