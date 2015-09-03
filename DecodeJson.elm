@@ -118,7 +118,7 @@ view address model =
         , required True
         ]
         []
-    , button [ onClick address SubmitUrl ] [ text "Fetch" ]
+    , button [ onClick address SubmitUrl, disabled (model.isFetching) ] [ text "Fetch" ]
     , a [ href model.url, target "_blank" ] [text "(Open)"]
     , (itemsView model.items model.isFetching)
     ]
